@@ -5,33 +5,37 @@
 
 DMX_Slave dmx_slave(DMX_SLAVE_CHANNELS);
 
-int INPUT_PINS[9] = { 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+int INPUT_PINS[8] = { 4, 5, 6, 7, 8, 9, 10, 12 };
 
 void setup() {
     // Enable DMX mode
     dmx_slave.enable();
-    dmx_slave.setStartAddress(0);
+    dmx_slave.setStartAddress(1);
 
     // Set input modes
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 8; i++) {
         pinMode(INPUT_PINS[i], INPUT_PULLUP);
     }
+
+    pinMode(11, OUTPUT);
 }
 
-int previousAddress = 0;
+int previousAddress = 1;
 
 void loop() {
     int address = 0;
 
-    for (unsigned char i = 8; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         address = address << 1;
         address = address | (digitalRead(INPUT_PINS[i]) ^ 1);
     }
 
-    if (address != previousAddress) {
+    if (address != previousAddress && address != 0) {
         previousAddress = address;
         dmx_slave.setStartAddress(address);
     }
 
-    delay(1000);
+    int value = dmx_slave.getChannelValue(1);
+
+    analogWrite(11, value);
 }
